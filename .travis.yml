@@ -3,33 +3,28 @@ python:
 - 3.8
 - 3.7
 - 3.6
-
 before_install:
 - pip install twine
 - pip install -U pip setuptools wheel tox-travis
-
 install:
 - pip install -r ./requirements_dev.txt
-
 branches:
   only:
   - master
-  - '/^v?\d(\.\d+)+$/'
-
+  - "/^v?\\d(\\.\\d+)+$/"
 script:
 - python setup.py sdist
 - python setup.py bdist_wheel
 - twine check dist/*
 - tox
-
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
   skip_existing: true
   user: __token__
   password:
-    secure: PLEASE_REPLACE_ME
+    secure: CUjwgZRk+X7CFeXzdCtZeDy93qa50wreijBCygQ303bh0pYDRjSbq4qERPo4iWGOj4cztslJov+GCbkNnx8QzFHOZt4VvX7iqNYaqn+hXW1mPyciaZuc/rIm+a5BmC3a0JcnNegEN9UvKEQtlAFiq4GGgSr1/A1eoage/eCTbzv3OfLO9IRC3Ip/NRj3ZoCCiTE2gCNwGQj3bx4kl2wFtY+N9UqtVboY9c966RJakIvjeJVP62xZugdXKuFyuhxhai12FsKTGe+OwEz/7385678fLSHasotiHUFWWZbbi7ZBv2v8xH27RutFS2iu2KYLEnK0sEfwcQyLOcb3g9p0Cw3f/sZPgBsE0vSKYmHazvqZTcCOCTaaqF2IyPcgU99fKpoEmrif06rqd1Sh0a/RX3TzhiQAmNd0cx88o5XI9jvrJNGlNenzVrW1SAh6VG0FUUWNAZ/dXZbbPTBDtpTSh5eohMqbb3blPnmfcUveDo/fJ121YiXyfemkhXZCxdk182xXUBsfbgcqmhNfVElRZASeDsbs2ZWwdV8KX8iUs6Q56dOvhXmQ2/a+SxFKSp0yFFEKK8BNunx4JODyfdm98iJtW5aq14/8HjAVXLuQ6+O8bQPB7ESlbSFTnNELQSPejqabVB94PThxurwO3jAwDYJZp2KXcy5ftBMa5NlYR6M=
   on:
     repo: dldevinc/aioja
-    condition: $TRAVIS_PYTHON_VERSION = 3.8
+    condition: "$TRAVIS_PYTHON_VERSION = 3.8"
     tags: true
