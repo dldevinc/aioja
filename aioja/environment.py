@@ -1,10 +1,12 @@
 import os
 import sys
 import weakref
+from typing import Callable, Iterable, Union, Optional
 
 import aiofiles
 from jinja2._compat import PY2, PYPY, encode_filename, string_types, text_type
-from jinja2.environment import Environment as DefaultEnvironment, Template
+from jinja2.environment import Environment as DefaultEnvironment
+from jinja2.environment import Template
 from jinja2.exceptions import (
     TemplateNotFound,
     TemplatesNotFound,
@@ -37,7 +39,7 @@ class Environment(DefaultEnvironment):
         return template
 
     @internalcode
-    async def get_template(self, name, parent=None, globals=None):
+    async def get_template(self, name: str, parent=None, globals=None):
         """Load a template from the loader.  If a loader is configured this
         method asks the loader for the template and returns a :class:`Template`.
         If the `parent` parameter is not `None`, :meth:`join_path` is called
@@ -60,7 +62,7 @@ class Environment(DefaultEnvironment):
         return await self._load_template(name, self.make_globals(globals))
 
     @internalcode
-    async def select_template(self, names, parent=None, globals=None):
+    async def select_template(self, names: Iterable[str], parent=None, globals=None):
         """Works like :meth:`get_template` but tries a number of templates
         before it fails.  If it cannot find any of the templates, it will
         raise a :exc:`TemplatesNotFound` exception.
@@ -96,7 +98,12 @@ class Environment(DefaultEnvironment):
         raise TemplatesNotFound(names)
 
     @internalcode
-    async def get_or_select_template(self, template_name_or_list, parent=None, globals=None):
+    async def get_or_select_template(
+        self,
+        template_name_or_list: Union[str, Iterable[str]],
+        parent=None,
+        globals=None
+    ):
         """Does a typecheck and dispatches to :meth:`select_template`
         if an iterable of template names is given, otherwise to
         :meth:`get_template`.
@@ -111,13 +118,13 @@ class Environment(DefaultEnvironment):
 
     async def compile_templates(
         self,
-        target,
-        extensions=None,
-        filter_func=None,
-        zip="deflated",
-        log_function=None,
-        ignore_errors=True,
-        py_compile=False,
+        target: str,
+        extensions: Iterable[str] = None,
+        filter_func: Callable = None,
+        zip: Optional[str] = "deflated",
+        log_function: Callable = None,
+        ignore_errors: bool = True,
+        py_compile: bool = False,
     ):
         """Finds all the templates the loader can find, compiles them
         and stores them in `target`.  If `zip` is `None`, instead of in a
