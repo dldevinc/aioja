@@ -62,3 +62,5 @@ async def test_aiocache_bytecode_cache(aioredis_pool):
         '    <li>Three</li>\n'
         '</ul>'
     )
+
+    await aiocache.caches.get('redis').close()

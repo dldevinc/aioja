@@ -3,9 +3,14 @@ from . import AsyncBytecodeCache
 
 
 class AioCacheBytecodeCache(AsyncBytecodeCache):
-    def __init__(self, cache_name='default'):
+    def __init__(
+        self,
+        cache_name: str = 'default',
+        prefix: str = 'jinja2'
+    ):
         self._backend = None
         self._cache_name = cache_name
+        self._prefix = prefix
 
     @property
     def backend(self):
@@ -14,7 +19,7 @@ class AioCacheBytecodeCache(AsyncBytecodeCache):
         return self._backend
 
     def make_key(self, bucket):
-        return 'jinja2:%s' % str(bucket.key)
+        return '%s:%s' % (self._prefix, str(bucket.key))
 
     async def load_bytecode(self, bucket):
         key = self.make_key(bucket)
