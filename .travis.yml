@@ -8,6 +8,8 @@ before_install:
 - pip install -U pip setuptools wheel tox-travis
 install:
 - pip install -r ./requirements_dev.txt
+services:
+  - redis-server
 branches:
   only:
   - master
