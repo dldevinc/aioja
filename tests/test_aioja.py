@@ -11,6 +11,7 @@ from aioja.loaders import ChoiceLoader, FileSystemLoader, ModuleLoader
 class TestEnvironment:
     def setup_class(self):
         self.env = Environment(
+            enable_async=True,
             trim_blocks=True,
             lstrip_blocks=True,
             loader=FileSystemLoader('tests/templates')
@@ -49,6 +50,7 @@ class TestEnvironment:
 @pytest.mark.asyncio
 async def test_async_file_bytecode_cache():
     env = Environment(
+        enable_async=True,
         trim_blocks=True,
         lstrip_blocks=True,
         loader=FileSystemLoader('tests/templates'),
@@ -86,6 +88,7 @@ async def test_async_file_bytecode_cache():
 @pytest.mark.asyncio
 async def test_compile_templates():
     env = Environment(
+        enable_async=True,
         trim_blocks=True,
         lstrip_blocks=True,
         loader=ChoiceLoader([

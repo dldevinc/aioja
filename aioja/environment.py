@@ -18,10 +18,6 @@ from jinja2.utils import internalcode
 
 
 class Environment(DefaultEnvironment):
-    def __init__(self, *args, **kwargs):
-        kwargs['enable_async'] = True
-        super().__init__(*args, **kwargs)
-
     @internalcode
     async def _load_template(self, name, globals):
         if self.loader is None:

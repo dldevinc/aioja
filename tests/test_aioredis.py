@@ -9,6 +9,7 @@ from aioja.loaders import FileSystemLoader
 @pytest.mark.asyncio
 async def test_aioredis_bytecode_cache(aioredis_pool):
     env = Environment(
+        enable_async=True,
         trim_blocks=True,
         lstrip_blocks=True,
         loader=FileSystemLoader('tests/templates'),
@@ -25,6 +26,7 @@ async def test_aioredis_bytecode_cache(aioredis_pool):
 @pytest.mark.asyncio
 async def test_aioredis_dsn_bytecode_cache():
     env = Environment(
+        enable_async=True,
         trim_blocks=True,
         lstrip_blocks=True,
         loader=FileSystemLoader('tests/templates'),

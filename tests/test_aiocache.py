@@ -29,6 +29,7 @@ aiocache.caches.set_config({
 @pytest.mark.asyncio
 async def test_aiocache_bytecode_cache(aioredis_pool):
     env = Environment(
+        enable_async=True,
         trim_blocks=True,
         lstrip_blocks=True,
         loader=FileSystemLoader('tests/templates'),
