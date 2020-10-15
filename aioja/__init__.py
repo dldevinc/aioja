@@ -11,4 +11,4 @@ from .loaders import (
 
 __all__ = ['Environment', 'ChoiceLoader', 'DictLoader', 'FileSystemLoader',
            'FunctionLoader', 'ModuleLoader', 'PackageLoader', 'PrefixLoader']
-__version__ = '0.0.3'
+__version__ = '0.0.4'
