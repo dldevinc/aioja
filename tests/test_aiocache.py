@@ -6,21 +6,21 @@ from aioja.environment import Environment
 from aioja.loaders import FileSystemLoader
 
 aiocache.caches.set_config({
-    'default': {
-        'cache': "aiocache.SimpleMemoryCache",
-        'serializer': {
-            'class': "aiocache.serializers.StringSerializer"
+    "default": {
+        "cache": "aiocache.SimpleMemoryCache",
+        "serializer": {
+            "class": "aiocache.serializers.StringSerializer"
         }
     },
-    'redis': {
-        'cache': "aiocache.RedisCache",
-        'endpoint': "127.0.0.1",
-        'port': 6379,
-        'db': 0,
-        'namespace': 'cache',
-        'serializer': {
-            'class': "aiocache.serializers.NullSerializer",
-            'encoding': None,
+    "redis": {
+        "cache": "aiocache.RedisCache",
+        "endpoint": "127.0.0.1",
+        "port": 6379,
+        "db": 0,
+        "namespace": "cache",
+        "serializer": {
+            "class": "aiocache.serializers.NullSerializer",
+            "encoding": None,
         },
     }
 })
@@ -32,19 +32,19 @@ async def test_aiocache_bytecode_cache(aioredis_pool):
         enable_async=True,
         trim_blocks=True,
         lstrip_blocks=True,
-        loader=FileSystemLoader('tests/templates'),
-        bytecode_cache=AioCacheBytecodeCache(cache_name='redis')
+        loader=FileSystemLoader("tests/templates"),
+        bytecode_cache=AioCacheBytecodeCache(cache_name="redis")
     )
 
-    bucket_key = '0d5e391ad86ee505e39df96fbcb5c9822224798f'
+    bucket_key = "0d5e391ad86ee505e39df96fbcb5c9822224798f"
 
     # clean bytecode cache
-    cache_key = 'jinja2:%s' % bucket_key
+    cache_key = "jinja2:%s" % bucket_key
     await aioredis_pool.delete(cache_key)
     assert await aioredis_pool.get(cache_key) is None
 
     # first load - from file
-    file_template = await env.get_template('list.html')
+    file_template = await env.get_template("list.html")
     assert file_template is not None
     assert aioredis_pool.get(cache_key) is not None
 
@@ -52,16 +52,16 @@ async def test_aiocache_bytecode_cache(aioredis_pool):
     env.cache.clear()
 
     # second load - from bytecode cache
-    template = await env.get_template('list.html')
+    template = await env.get_template("list.html")
     assert template is not None
 
-    content = await template.render_async(array=['One', 'Two', 'Three'])
+    content = await template.render_async(array=["One", "Two", "Three"])
     assert content == (
-        '<ul>\n'
-        '    <li>One</li>\n'
-        '    <li>Two</li>\n'
-        '    <li>Three</li>\n'
-        '</ul>'
+        "<ul>\n"
+        "    <li>One</li>\n"
+        "    <li>Two</li>\n"
+        "    <li>Three</li>\n"
+        "</ul>"
     )
 
-    await aiocache.caches.get('redis').close()
+    await aiocache.caches.get("redis").close()

@@ -24,7 +24,7 @@ class Environment(DefaultEnvironment):
 
     def __init__(self, *args, **kwargs):
         # `enable_async` MUST  be enabled for proper template compilation
-        kwargs['enable_async'] = True
+        kwargs["enable_async"] = True
         super().__init__(*args, **kwargs)
 
     @internalcode

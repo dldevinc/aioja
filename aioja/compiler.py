@@ -16,8 +16,7 @@ class AsyncCodeGenerator(CodeGenerator):
     def visit_Extends(self, node, frame):
         """Calls the extender."""
         if not frame.toplevel:
-            self.fail('cannot use extend from a non top-level scope',
-                      node.lineno)
+            self.fail("cannot use extend from a non top-level scope", node.lineno)
 
         # if the number of extends statements in general is zero so
         # far, we don't have to add a check if something extended
@@ -29,10 +28,9 @@ class AsyncCodeGenerator(CodeGenerator):
             # time too, but i welcome it not to confuse users by throwing the
             # same error at different times just "because we can".
             if not self.has_known_extends:
-                self.writeline('if parent_template is not None:')
+                self.writeline("if parent_template is not None:")
                 self.indent()
-            self.writeline('raise TemplateRuntimeError(%r)' %
-                           'extended multiple times')
+            self.writeline("raise TemplateRuntimeError(%r)" % "extended multiple times")
 
             # if we have a known extends already we don't need that code here
             # as we know that the template execution will end here.
@@ -41,14 +39,14 @@ class AsyncCodeGenerator(CodeGenerator):
             else:
                 self.outdent()
 
-        self.writeline('parent_template = await environment.get_template(', node)
+        self.writeline("parent_template = await environment.get_template(", node)
         self.visit(node.template, frame)
-        self.write(', %r)' % self.name)
-        self.writeline('for name, parent_block in parent_template.'
-                       'blocks.%s():' % dict_item_iter)
+        self.write(", %r)" % self.name)
+        self.writeline(
+            "for name, parent_block in parent_template.blocks.%s():" % dict_item_iter
+        )
         self.indent()
-        self.writeline('context.blocks.setdefault(name, []).'
-                       'append(parent_block)')
+        self.writeline("context.blocks.setdefault(name, []).append(parent_block)")
         self.outdent()
 
         # if this extends statement was in the root level we can take
@@ -63,52 +61,56 @@ class AsyncCodeGenerator(CodeGenerator):
     def visit_Include(self, node, frame):
         """Handles includes."""
         if node.ignore_missing:
-            self.writeline('try:')
+            self.writeline("try:")
             self.indent()
 
-        func_name = 'get_or_select_template'
+        func_name = "get_or_select_template"
         if isinstance(node.template, nodes.Const):
             if isinstance(node.template.value, string_types):
-                func_name = 'get_template'
+                func_name = "get_template"
             elif isinstance(node.template.value, (tuple, list)):
-                func_name = 'select_template'
+                func_name = "select_template"
         elif isinstance(node.template, (nodes.Tuple, nodes.List)):
-            func_name = 'select_template'
+            func_name = "select_template"
 
-        self.writeline('template = await environment.%s(' % func_name, node)
+        self.writeline("template = await environment.%s(" % func_name, node)
         self.visit(node.template, frame)
-        self.write(', %r)' % self.name)
+        self.write(", %r)" % self.name)
         if node.ignore_missing:
             self.outdent()
-            self.writeline('except TemplateNotFound:')
+            self.writeline("except TemplateNotFound:")
             self.indent()
-            self.writeline('pass')
+            self.writeline("pass")
             self.outdent()
-            self.writeline('else:')
+            self.writeline("else:")
             self.indent()
 
         skip_event_yield = False
         if node.with_context:
-            loop = self.environment.is_async and 'async for' or 'for'
-            self.writeline('%s event in template.root_render_func('
-                           'template.new_context(context.get_all(), True, '
-                           '%s)):' % (loop, self.dump_local_context(frame)))
+            loop = self.environment.is_async and "async for" or "for"
+            self.writeline(
+                "%s event in template.root_render_func("
+                "template.new_context(context.get_all(), True, "
+                "%s)):" % (loop, self.dump_local_context(frame))
+            )
         elif self.environment.is_async:
-            self.writeline('for event in (await '
-                           'template._get_default_module_async())'
-                           '._body_stream:')
+            self.writeline(
+                "for event in (await "
+                "template._get_default_module_async())"
+                "._body_stream:"
+            )
         else:
             if supports_yield_from:
-                self.writeline('yield from template._get_default_module()'
-                               '._body_stream')
+                self.writeline("yield from template._get_default_module()._body_stream")
                 skip_event_yield = True
             else:
-                self.writeline('for event in template._get_default_module()'
-                               '._body_stream:')
+                self.writeline(
+                    "for event in template._get_default_module()._body_stream:"
+                )
 
         if not skip_event_yield:
             self.indent()
-            self.simple_write('event', frame)
+            self.simple_write("event", frame)
             self.outdent()
 
         if node.ignore_missing:
