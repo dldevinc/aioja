@@ -2,6 +2,7 @@ import sys
 from os import path
 
 from jinja2 import loaders
+from jinja2._compat import string_types
 from jinja2.exceptions import TemplateNotFound
 from jinja2.utils import internalcode
 
@@ -73,6 +74,51 @@ class FileSystemLoader(AsyncLoaderMixin, loaders.FileSystemLoader):
 
             return contents, filename, uptodate
         raise TemplateNotFound(template)
+
+
+class PackageLoader(AsyncLoaderMixin, loaders.PackageLoader):
+    async def get_source(self, environment, template):
+        return super().get_source(environment, template)
+
+
+class DictLoader(AsyncLoaderMixin, loaders.DictLoader):
+    async def get_source(self, environment, template):
+        return super().get_source(environment, template)
+
+
+class FunctionLoader(AsyncLoaderMixin, loaders.FunctionLoader):
+    async def get_source(self, environment, template):
+        rv = await self.load_func(template)
+        if rv is None:
+            raise TemplateNotFound(template)
+        elif isinstance(rv, string_types):
+            return rv, None, None
+        return rv
+
+    def list_templates(self):
+        # FIX: jinja2 bug
+        return []
+
+
+class PrefixLoader(AsyncLoaderMixin, loaders.PrefixLoader):
+    async def get_source(self, environment, template):
+        loader, name = self.get_loader(template)
+        try:
+            return await loader.get_source(environment, name)
+        except TemplateNotFound:
+            # re-raise the exception with the correct filename here.
+            # (the one that includes the prefix)
+            raise TemplateNotFound(template)
+
+    @internalcode
+    async def load(self, environment, name, globals=None):
+        loader, local_name = self.get_loader(name)
+        try:
+            return await loader.load(environment, local_name, globals)
+        except TemplateNotFound:
+            # re-raise the exception with the correct filename here.
+            # (the one that includes the prefix)
+            raise TemplateNotFound(name)
 
 
 class ChoiceLoader(AsyncLoaderMixin, loaders.ChoiceLoader):

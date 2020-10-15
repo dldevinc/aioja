@@ -44,7 +44,7 @@ async def test_aiocache_bytecode_cache(aioredis_pool):
     assert await aioredis_pool.get(cache_key) is None
 
     # first load - from file
-    file_template = await env.get_template('example.html')
+    file_template = await env.get_template('list.html')
     assert file_template is not None
     assert aioredis_pool.get(cache_key) is not None
 
@@ -52,7 +52,7 @@ async def test_aiocache_bytecode_cache(aioredis_pool):
     env.cache.clear()
 
     # second load - from bytecode cache
-    template = await env.get_template('example.html')
+    template = await env.get_template('list.html')
     assert template is not None
 
     content = await template.render_async(array=['One', 'Two', 'Three'])

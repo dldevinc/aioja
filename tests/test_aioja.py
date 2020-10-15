@@ -5,7 +5,7 @@ import pytest
 
 from aioja.bccache import AsyncFileSystemBytecodeCache
 from aioja.environment import Environment
-from aioja.loaders import ChoiceLoader, FileSystemLoader, ModuleLoader
+from aioja.loaders import FileSystemLoader
 
 
 class TestEnvironment:
@@ -19,31 +19,28 @@ class TestEnvironment:
 
     @pytest.mark.asyncio
     async def test_get_template(self):
-        template = await self.env.get_template('example.html')
+        template = await self.env.get_template('text.html')
         assert template is not None
 
     @pytest.mark.asyncio
     async def test_select_template(self):
-        template = await self.env.select_template(['missing.html', 'example.html'])
+        template = await self.env.select_template(['missing.html', 'text.html'])
         assert template is not None
 
     @pytest.mark.asyncio
     async def test_get_or_select_template(self):
-        template1 = await self.env.get_or_select_template('example.html')
-        template2 = await self.env.get_or_select_template(['missing.html', 'example.html'])
+        template1 = await self.env.get_or_select_template('text.html')
+        template2 = await self.env.get_or_select_template(['missing.html', 'text.html'])
         assert template1 is not None
         assert template2 is not None
 
     @pytest.mark.asyncio
     async def test_rendering(self):
-        template = await self.env.get_template('example.html')
-        content = await template.render_async(array=['One', 'Two', 'Three'])
+        template = await self.env.get_template('text.html')
+        content = await template.render_async(title='Page Title', text='Great freedom :-)')
         assert content == (
-            '<ul>\n'
-            '    <li>One</li>\n'
-            '    <li>Two</li>\n'
-            '    <li>Three</li>\n'
-            '</ul>'
+            '<h1>Page Title</h1>\n'
+            '<p>Great freedom :-)</p>'
         )
 
 
@@ -57,14 +54,14 @@ async def test_async_file_bytecode_cache():
         bytecode_cache=AsyncFileSystemBytecodeCache('tests/jinja_cache', '%s.cache')
     )
 
-    bucket_key = '0d5e391ad86ee505e39df96fbcb5c9822224798f'
+    bucket_key = '3d566c27c1dca9e2cf7cf410ce798d0fe23bb149'
 
     # clean bytecode cache
     shutil.rmtree('tests/jinja_cache', ignore_errors=True)
     os.makedirs('tests/jinja_cache')
 
     # first load - from file
-    file_template = await env.get_template('example.html')
+    file_template = await env.get_template('list.html')
     assert file_template is not None
     assert os.path.isfile('tests/jinja_cache/%s.cache' % bucket_key)
 
@@ -72,40 +69,7 @@ async def test_async_file_bytecode_cache():
     env.cache.clear()
 
     # second load - from bytecode cache
-    template = await env.get_template('example.html')
-    assert template is not None
-
-    content = await template.render_async(array=['One', 'Two', 'Three'])
-    assert content == (
-        '<ul>\n'
-        '    <li>One</li>\n'
-        '    <li>Two</li>\n'
-        '    <li>Three</li>\n'
-        '</ul>'
-    )
-
-
-@pytest.mark.asyncio
-async def test_compile_templates():
-    env = Environment(
-        enable_async=True,
-        trim_blocks=True,
-        lstrip_blocks=True,
-        loader=ChoiceLoader([
-            ModuleLoader('tests/compiled'),
-            FileSystemLoader('tests/templates'),
-        ])
-    )
-
-    # precompile templates
-    await env.compile_templates(
-        'tests/compiled',
-        zip=None
-    )
-
-    assert os.path.isfile('tests/compiled/tmpl_15b077f129e7c6eb4bf99ed88e9c8ead954d6dcd.py')
-
-    template = await env.get_template('example.html')
+    template = await env.get_template('list.html')
     assert template is not None
 
     content = await template.render_async(array=['One', 'Two', 'Three'])
