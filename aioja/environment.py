@@ -22,6 +22,11 @@ from .compiler import AsyncCodeGenerator
 class Environment(DefaultEnvironment):
     code_generator_class = AsyncCodeGenerator
 
+    def __init__(self, *args, **kwargs):
+        # `enable_async` MUST  be enabled for proper template compilation
+        kwargs['enable_async'] = True
+        super().__init__(*args, **kwargs)
+
     @internalcode
     async def _load_template(self, name, globals):
         if self.loader is None:
