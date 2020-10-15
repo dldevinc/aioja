@@ -16,8 +16,12 @@ from jinja2.exceptions import (
 from jinja2.runtime import Undefined
 from jinja2.utils import internalcode
 
+from .compiler import AsyncCodeGenerator
+
 
 class Environment(DefaultEnvironment):
+    code_generator_class = AsyncCodeGenerator
+
     @internalcode
     async def _load_template(self, name, globals):
         if self.loader is None:
