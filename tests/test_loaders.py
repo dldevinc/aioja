@@ -15,6 +15,38 @@ from aioja.loaders import (
 
 
 @pytest.mark.asyncio
+async def test_filesystem_loader():
+    env = Environment(
+        trim_blocks=True,
+        lstrip_blocks=True,
+        loader=FileSystemLoader('tests/templates')
+    )
+
+    template = await env.get_template('list.html')
+    content = template.render(array=['Red', 'Blue', 'Green'])
+    assert content == (
+        '<ul>\n'
+        '    <li>Red</li>\n'
+        '    <li>Blue</li>\n'
+        '    <li>Green</li>\n'
+        '</ul>'
+    )
+
+
+@pytest.mark.asyncio
+async def test_filesystem_loader_templates():
+    env = Environment(
+        loader=FileSystemLoader('tests/templates')
+    )
+
+    templates = await env.list_templates()
+    assert set(templates) == {
+        'list.html',
+        'text.html',
+    }
+
+
+@pytest.mark.asyncio
 async def test_module_loader():
     env = Environment(
         trim_blocks=True,
@@ -32,6 +64,7 @@ async def test_module_loader():
     )
 
     assert os.path.isfile('tests/compiled/tmpl_7cf55666eecc765859bfbe8a10c163548abcbbf9.py')
+    assert os.path.isfile('tests/compiled/tmpl_24bbb006a6564ab6d1f32e3604e76401b4b8dd93.py')
 
     template = await env.get_template('list.html')
     assert template is not None
@@ -44,6 +77,16 @@ async def test_module_loader():
         '    <li>Three</li>\n'
         '</ul>'
     )
+
+
+@pytest.mark.asyncio
+async def test_module_loader_templates():
+    env = Environment(
+        loader=ModuleLoader('tests/compiled')
+    )
+
+    templates = await env.list_templates()
+    assert set(templates) == set()
 
 
 @pytest.mark.asyncio
@@ -67,6 +110,19 @@ async def test_package_loader():
 
 
 @pytest.mark.asyncio
+async def test_package_loader_templates():
+    env = Environment(
+        loader=PackageLoader('tests')
+    )
+
+    templates = await env.list_templates()
+    assert set(templates) == {
+        'list.html',
+        'text.html'
+    }
+
+
+@pytest.mark.asyncio
 async def test_dict_loader():
     env = Environment(
         trim_blocks=True,
@@ -79,6 +135,20 @@ async def test_dict_loader():
     template = await env.get_template('var')
     content = template.render(value='Hello')
     assert content == '<div>Hello</div>'
+
+
+@pytest.mark.asyncio
+async def test_dict_loader_templates():
+    env = Environment(
+        loader=DictLoader({
+            'var': '<div>{{ value }}</div>'
+        })
+    )
+
+    templates = await env.list_templates()
+    assert set(templates) == {
+        'var'
+    }
 
 
 @pytest.mark.asyncio
@@ -95,6 +165,19 @@ async def test_function_loader():
     template = await env.get_template('span')
     content = template.render(value='Silver')
     assert content == '<span>Silver</span>'
+
+
+@pytest.mark.asyncio
+async def test_function_loader_templates():
+    async def get_source(name):
+        return "<{0}>{{{{ value }}}}</{0}>".format(name)
+
+    env = Environment(
+        loader=FunctionLoader(get_source)
+    )
+
+    templates = await env.list_templates()
+    assert set(templates) == set()
 
 
 @pytest.mark.asyncio
@@ -120,3 +203,23 @@ async def test_prefix_loader():
     template = await env.get_template('dict/header')
     content = template.render(title='Header')
     assert content == '<h2>Header</h2>'
+
+
+@pytest.mark.asyncio
+async def test_prefix_loader_templates():
+    async def get_source(name):
+        return "<{0}>{{{{ value }}}}</{0}>".format(name)
+
+    env = Environment(
+        loader=PrefixLoader({
+            'func': FunctionLoader(get_source),
+            'dict': DictLoader({
+                'header': '<h2>{{ title }}</h2>'
+            }),
+        })
+    )
+
+    templates = await env.list_templates()
+    assert set(templates) == {
+        'dict/header'
+    }

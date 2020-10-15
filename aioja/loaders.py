@@ -2,7 +2,7 @@ import sys
 from os import path
 
 from jinja2 import loaders
-from jinja2._compat import string_types
+from jinja2._compat import string_types, iteritems
 from jinja2.exceptions import TemplateNotFound
 from jinja2.utils import internalcode
 
@@ -75,15 +75,24 @@ class FileSystemLoader(AsyncLoaderMixin, loaders.FileSystemLoader):
             return contents, filename, uptodate
         raise TemplateNotFound(template)
 
+    async def list_templates(self):
+        return super().list_templates()
+
 
 class PackageLoader(AsyncLoaderMixin, loaders.PackageLoader):
     async def get_source(self, environment, template):
         return super().get_source(environment, template)
 
+    async def list_templates(self):
+        return super().list_templates()
+
 
 class DictLoader(AsyncLoaderMixin, loaders.DictLoader):
     async def get_source(self, environment, template):
         return super().get_source(environment, template)
+
+    async def list_templates(self):
+        return super().list_templates()
 
 
 class FunctionLoader(AsyncLoaderMixin, loaders.FunctionLoader):
@@ -95,7 +104,7 @@ class FunctionLoader(AsyncLoaderMixin, loaders.FunctionLoader):
             return rv, None, None
         return rv
 
-    def list_templates(self):
+    async def list_templates(self):
         # FIX: jinja2 bug
         return []
 
@@ -120,6 +129,13 @@ class PrefixLoader(AsyncLoaderMixin, loaders.PrefixLoader):
             # (the one that includes the prefix)
             raise TemplateNotFound(name)
 
+    async def list_templates(self):
+        result = []
+        for prefix, loader in iteritems(self.mapping):
+            for template in await loader.list_templates():
+                result.append(prefix + self.delimiter + template)
+        return result
+
 
 class ChoiceLoader(AsyncLoaderMixin, loaders.ChoiceLoader):
     async def get_source(self, environment, template):
@@ -139,6 +155,12 @@ class ChoiceLoader(AsyncLoaderMixin, loaders.ChoiceLoader):
             except TemplateNotFound:
                 pass
         raise TemplateNotFound(name)
+
+    async def list_templates(self):
+        found = set()
+        for loader in self.loaders:
+            found.update(await loader.list_templates())
+        return sorted(found)
 
 
 class ModuleLoader(AsyncLoaderMixin, loaders.ModuleLoader):
@@ -161,6 +183,6 @@ class ModuleLoader(AsyncLoaderMixin, loaders.ModuleLoader):
             environment, mod.__dict__, globals
         )
 
-    def list_templates(self):
+    async def list_templates(self):
         # FIX: jinja2 bug
         return []

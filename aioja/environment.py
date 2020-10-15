@@ -197,7 +197,8 @@ class Environment(DefaultEnvironment):
             log_function('Compiling into folder "%s"' % target)
 
         try:
-            for name in self.list_templates(extensions, filter_func):
+            names = await self.list_templates(extensions, filter_func)
+            for name in names:
                 source, filename, _ = await self.loader.get_source(self, name)
                 try:
                     code = self.compile(source, name, filename, True, True)
@@ -221,3 +222,35 @@ class Environment(DefaultEnvironment):
                 zip_file.close()
 
         log_function("Finished compiling templates")
+
+    async def list_templates(self, extensions=None, filter_func=None):
+        """Returns a list of templates for this environment.  This requires
+        that the loader supports the loader's
+        :meth:`~BaseLoader.list_templates` method.
+
+        If there are other files in the template folder besides the
+        actual templates, the returned list can be filtered.  There are two
+        ways: either `extensions` is set to a list of file extensions for
+        templates, or a `filter_func` can be provided which is a callable that
+        is passed a template name and should return `True` if it should end up
+        in the result list.
+
+        If the loader does not support that, a :exc:`TypeError` is raised.
+
+        .. versionadded:: 2.4
+        """
+        names = await self.loader.list_templates()
+
+        if extensions is not None:
+            if filter_func is not None:
+                raise TypeError(
+                    "either extensions or filter_func can be passed, but not both"
+                )
+
+            def filter_func(x):
+                return "." in x and x.rsplit(".", 1)[1] in extensions
+
+        if filter_func is not None:
+            names = [name for name in names if filter_func(name)]
+
+        return names
