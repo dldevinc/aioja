@@ -23,7 +23,7 @@ async def test_filesystem_loader():
     )
 
     template = await env.get_template("list.html")
-    content = template.render(array=["Red", "Blue", "Green"])
+    content = await template.render_async(array=["Red", "Blue", "Green"])
     assert content == (
         "<ul>\n"
         "    <li>Red</li>\n"
@@ -69,7 +69,7 @@ async def test_module_loader():
     template = await env.get_template("list.html")
     assert template is not None
 
-    content = template.render(array=["One", "Two", "Three"])
+    content = await template.render_async(array=["One", "Two", "Three"])
     assert content == (
         "<ul>\n"
         "    <li>One</li>\n"
@@ -98,7 +98,7 @@ async def test_package_loader():
     )
 
     template = await env.get_template("list.html")
-    content = template.render(array=["1", "2", "3", "4"])
+    content = await template.render_async(array=["1", "2", "3", "4"])
     assert content == (
         "<ul>\n"
         "    <li>1</li>\n"
@@ -133,7 +133,7 @@ async def test_dict_loader():
     )
 
     template = await env.get_template("var")
-    content = template.render(value="Hello")
+    content = await template.render_async(value="Hello")
     assert content == "<div>Hello</div>"
 
 
@@ -163,7 +163,7 @@ async def test_function_loader():
     )
 
     template = await env.get_template("span")
-    content = template.render(value="Silver")
+    content = await template.render_async(value="Silver")
     assert content == "<span>Silver</span>"
 
 
@@ -197,11 +197,11 @@ async def test_prefix_loader():
     )
 
     template = await env.get_template("func/article")
-    content = template.render(value="Paragraph")
+    content = await template.render_async(value="Paragraph")
     assert content == "<article>Paragraph</article>"
 
     template = await env.get_template("dict/header")
-    content = template.render(title="Header")
+    content = await template.render_async(title="Header")
     assert content == "<h2>Header</h2>"
 
 
