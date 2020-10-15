@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.0.4](https://github.com/dldevinc/aioja/tree/v0.0.4) - 2020-10-15
+- Fix `{% extends %}` and `{% include %}` tags
+- `enable_async` is now forced to be `True`
+
 ## [0.0.3](https://github.com/dldevinc/aioja/tree/v0.0.3) - 2020-10-15
 - Add more loaders
 - Make `list_templates` method async
