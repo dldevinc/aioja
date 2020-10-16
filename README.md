@@ -10,6 +10,9 @@ In addition to Jinja's built-in `render_async`, i've added:
 * async bytecode cache ([aioredis](https://github.com/aio-libs/aioredis) and [aiocache](https://github.com/argaen/aiocache) supported)
 * async version of the `Environment.compile_templates` method
 
+**Noteice**: keep in mind that the `enable_async` option is forced to `True`
+in order to compile templates correctly.
+
 ## Install
 
 ```
